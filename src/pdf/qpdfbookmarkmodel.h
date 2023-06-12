@@ -40,11 +40,15 @@
 #include "qtpdfglobal.h"
 
 #include <QAbstractItemModel>
+#include <private/qabstractitemmodel_p.h>
 
 QT_BEGIN_NAMESPACE
 
 class QPdfDocument;
 class QPdfBookmarkModelPrivate;
+class BookmarkNode;
+typedef void* FPDF_BOOKMARK;
+typedef void* FPDF_DOCUMENT;
 
 class Q_PDF_EXPORT QPdfBookmarkModel : public QAbstractItemModel
 {
@@ -92,6 +96,28 @@ private:
     Q_DECLARE_PRIVATE(QPdfBookmarkModel)
 
     Q_PRIVATE_SLOT(d_func(), void _q_documentStatusChanged())
+};
+
+class QPdfBookmarkModelPrivate : public QAbstractItemModelPrivate
+{
+public:
+    QPdfBookmarkModelPrivate();
+
+    void rebuild();
+
+    void appendChildNode(BookmarkNode *parentBookmarkNode, FPDF_BOOKMARK parentBookmark,
+                         int level, FPDF_DOCUMENT document);
+
+    void _q_documentStatusChanged()
+    {
+        rebuild();
+    }
+
+    Q_DECLARE_PUBLIC(QPdfBookmarkModel)
+
+    QScopedPointer<BookmarkNode> m_rootNode;
+    QPointer<QPdfDocument> m_document;
+    QPdfBookmarkModel::StructureMode m_structureMode;
 };
 
 QT_END_NAMESPACE

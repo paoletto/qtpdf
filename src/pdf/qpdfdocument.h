@@ -104,7 +104,7 @@ public:
     DocumentError error() const;
 
     void close();
-
+    quint64 bytesCount() const;
     int pageCount() const;
 
     QSizeF pageSize(int page) const;
@@ -120,8 +120,6 @@ Q_SIGNALS:
 private:
     friend class QPdfBookmarkModelPrivate;
 
-    Q_PRIVATE_SLOT(d, void _q_tryLoadingWithSizeFromContentHeader())
-    Q_PRIVATE_SLOT(d, void _q_copyFromSequentialSourceDevice())
     QScopedPointer<QPdfDocumentPrivate> d;
 };
 

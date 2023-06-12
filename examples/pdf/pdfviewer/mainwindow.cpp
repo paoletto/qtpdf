@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->bookmarkView->setModel(bookmarkModel);
     connect(ui->bookmarkView, SIGNAL(activated(QModelIndex)), this, SLOT(bookmarkSelected(QModelIndex)));
 
-    ui->tabWidget->setTabEnabled(1, false); // disable 'Pages' tab for now
+//    ui->tabWidget->setTabEnabled(1, false); // disable 'Pages' tab for now
 
     ui->pdfView->setDocument(m_document);
 

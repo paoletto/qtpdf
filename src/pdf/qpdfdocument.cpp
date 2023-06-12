@@ -178,7 +178,8 @@ void QPdfDocumentPrivate::load(QIODevice *newDevice, bool transferDeviceOwnershi
         if (reply->header(QNetworkRequest::ContentLengthHeader).isValid())
             _q_tryLoadingWithSizeFromContentHeader();
         else
-            QObject::connect(reply, SIGNAL(metaDataChanged()), q, SLOT(_q_tryLoadingWithSizeFromContentHeader()));
+            QObject::connect(reply, &QNetworkReply::metaDataChanged,
+                             [this](){_q_tryLoadingWithSizeFromContentHeader();});
     } else {
         device = newDevice;
         initiateAsyncLoadWithTotalSizeKnown(device->size());
@@ -203,7 +204,8 @@ void QPdfDocumentPrivate::_q_tryLoadingWithSizeFromContentHeader()
         return;
     }
 
-    QObject::connect(sequentialSourceDevice, SIGNAL(readyRead()), q, SLOT(_q_copyFromSequentialSourceDevice()));
+    QObject::connect(sequentialSourceDevice, &QIODevice::readyRead,
+                     [this](){_q_copyFromSequentialSourceDevice();});
 
     initiateAsyncLoadWithTotalSizeKnown(contentLength.toULongLong());
 
@@ -534,6 +536,11 @@ void QPdfDocument::close()
     d->setStatus(Null);
 }
 
+quint64 QPdfDocument::bytesCount() const
+{
+    return d->m_FileLen;
+}
+
 /*!
   Returns the amount of pages for the loaded document or \c 0 if
   no document is loaded.
@@ -624,4 +631,4 @@ QImage QPdfDocument::render(int page, QSize imageSize, QPdfDocumentRenderOptions
 
 QT_END_NAMESPACE
 
-#include "moc_qpdfdocument.cpp"
+//#include "moc_qpdfdocument.cpp"

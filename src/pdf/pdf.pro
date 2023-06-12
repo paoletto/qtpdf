@@ -15,12 +15,15 @@ LIBS_PRIVATE += -L$$MODULE_BASE_OUTDIR/lib -lqtpdfium$$qtPlatformTargetSuffix()
 QMAKE_DOCS = $$PWD/doc/qtpdf.qdocconf
 
 gcc {
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+#    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 
 msvc {
-    QMAKE_CXXFLAGS_WARN_ON += -wd"4100"
+#    QMAKE_CXXFLAGS_WARN_ON += -wd"4100"
 }
+
+QMAKE_CXXFLAGS += -Werror
+CONFIG += warn_off
 
 SOURCES += \
     jsbridge.cpp \

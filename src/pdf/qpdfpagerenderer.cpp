@@ -44,29 +44,6 @@
 
 QT_BEGIN_NAMESPACE
 
-class RenderWorker : public QObject
-{
-    Q_OBJECT
-
-public:
-    RenderWorker();
-    ~RenderWorker();
-
-    void setDocument(QPdfDocument *document);
-
-public Q_SLOTS:
-    void requestPage(quint64 requestId, int page, QSize imageSize,
-                     QPdfDocumentRenderOptions options);
-
-Q_SIGNALS:
-    void pageRendered(int page, QSize imageSize, const QImage &image,
-                      QPdfDocumentRenderOptions options, quint64 requestId);
-
-private:
-    QPointer<QPdfDocument> m_document;
-    QMutex m_mutex;
-};
-
 class QPdfPageRendererPrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QPdfPageRenderer)
@@ -356,4 +333,4 @@ quint64 QPdfPageRenderer::requestPage(int pageNumber, QSize imageSize,
 
 QT_END_NAMESPACE
 
-#include "qpdfpagerenderer.moc"
+//#include "qpdfpagerenderer.moc"

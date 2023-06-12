@@ -311,4 +311,4 @@ void QPdfPageNavigation::goToNextPage()
 
 QT_END_NAMESPACE
 
-#include "moc_qpdfpagenavigation.cpp"
+//#include "moc_qpdfpagenavigation.cpp"

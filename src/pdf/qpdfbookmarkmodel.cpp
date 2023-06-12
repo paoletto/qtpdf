@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#include "qpdfbookmarkmodel.h"
 
+#include "qpdfbookmarkmodel.h"
 #include "qpdfdocument.h"
 #include "qpdfdocument_p.h"
 
@@ -44,7 +44,7 @@
 
 #include <QPointer>
 #include <QScopedPointer>
-#include <private/qabstractitemmodel_p.h>
+
 
 QT_BEGIN_NAMESPACE
 
@@ -134,88 +134,6 @@ private:
     QString m_title;
     int m_level;
     int m_pageNumber;
-};
-
-
-class QPdfBookmarkModelPrivate : public QAbstractItemModelPrivate
-{
-public:
-    QPdfBookmarkModelPrivate()
-        : QAbstractItemModelPrivate()
-        , m_rootNode(new BookmarkNode(nullptr))
-        , m_document(nullptr)
-        , m_structureMode(QPdfBookmarkModel::TreeMode)
-    {
-    }
-
-    void rebuild()
-    {
-        Q_Q(QPdfBookmarkModel);
-
-        const bool documentAvailable = (m_document && m_document->status() == QPdfDocument::Ready);
-
-        if (documentAvailable) {
-            q->beginResetModel();
-            m_rootNode->clear();
-            QPdfMutexLocker lock;
-            appendChildNode(m_rootNode.data(), nullptr, 0, m_document->d->doc);
-            lock.unlock();
-            q->endResetModel();
-        } else {
-            if (m_rootNode->childCount() == 0) {
-                return;
-            } else {
-                q->beginResetModel();
-                m_rootNode->clear();
-                q->endResetModel();
-            }
-        }
-    }
-
-    void appendChildNode(BookmarkNode *parentBookmarkNode, FPDF_BOOKMARK parentBookmark, int level, FPDF_DOCUMENT document)
-    {
-        FPDF_BOOKMARK bookmark = FPDFBookmark_GetFirstChild(document, parentBookmark);
-
-        while (bookmark) {
-            BookmarkNode *childBookmarkNode = nullptr;
-
-            if (m_structureMode == QPdfBookmarkModel::TreeMode) {
-                childBookmarkNode = new BookmarkNode(parentBookmarkNode);
-                parentBookmarkNode->appendChild(childBookmarkNode);
-            } else if (m_structureMode == QPdfBookmarkModel::ListMode) {
-                childBookmarkNode = new BookmarkNode(m_rootNode.data());
-                m_rootNode->appendChild(childBookmarkNode);
-            }
-
-            const unsigned long titleLength = FPDFBookmark_GetTitle(bookmark, nullptr, 0);
-
-            QVector<ushort> titleBuffer(titleLength);
-            FPDFBookmark_GetTitle(bookmark, titleBuffer.data(), titleBuffer.length());
-
-            const FPDF_DEST dest = FPDFBookmark_GetDest(document, bookmark);
-            const int pageNumber = FPDFDest_GetPageIndex(document, dest);
-
-            childBookmarkNode->setTitle(QString::fromUtf16(titleBuffer.data()));
-            childBookmarkNode->setLevel(level);
-            childBookmarkNode->setPageNumber(pageNumber);
-
-            // recurse down
-            appendChildNode(childBookmarkNode, bookmark, level + 1, document);
-
-            bookmark = FPDFBookmark_GetNextSibling(document, bookmark);
-        }
-    }
-
-    void _q_documentStatusChanged()
-    {
-        rebuild();
-    }
-
-    Q_DECLARE_PUBLIC(QPdfBookmarkModel)
-
-    QScopedPointer<BookmarkNode> m_rootNode;
-    QPointer<QPdfDocument> m_document;
-    QPdfBookmarkModel::StructureMode m_structureMode;
 };
 
 
@@ -358,6 +276,78 @@ int QPdfBookmarkModel::rowCount(const QModelIndex &parent) const
     return parentNode->childCount();
 }
 
+QPdfBookmarkModelPrivate::QPdfBookmarkModelPrivate()
+    : QAbstractItemModelPrivate()
+    , m_rootNode(new BookmarkNode(nullptr))
+    , m_document(nullptr)
+    , m_structureMode(QPdfBookmarkModel::TreeMode)
+{
+}
+
+void QPdfBookmarkModelPrivate::appendChildNode(BookmarkNode *parentBookmarkNode, FPDF_BOOKMARK parentBookmark, int level, FPDF_DOCUMENT document)
+{
+    FPDF_BOOKMARK bookmark = FPDFBookmark_GetFirstChild(document, parentBookmark);
+
+    while (bookmark) {
+        BookmarkNode *childBookmarkNode = nullptr;
+
+        if (m_structureMode == QPdfBookmarkModel::TreeMode) {
+            childBookmarkNode = new BookmarkNode(parentBookmarkNode);
+            parentBookmarkNode->appendChild(childBookmarkNode);
+        } else if (m_structureMode == QPdfBookmarkModel::ListMode) {
+            childBookmarkNode = new BookmarkNode(m_rootNode.data());
+            m_rootNode->appendChild(childBookmarkNode);
+        }
+
+        const unsigned long titleLength = FPDFBookmark_GetTitle(bookmark, nullptr, 0);
+
+        QVector<ushort> titleBuffer(titleLength);
+        FPDFBookmark_GetTitle(bookmark, titleBuffer.data(), titleBuffer.length());
+
+        const FPDF_DEST dest = FPDFBookmark_GetDest(document, bookmark);
+        const int pageNumber = FPDFDest_GetPageIndex(document, dest);
+
+        childBookmarkNode->setTitle(QString::fromUtf16(titleBuffer.data()));
+        childBookmarkNode->setLevel(level);
+        childBookmarkNode->setPageNumber(pageNumber);
+
+        // recurse down
+        appendChildNode(childBookmarkNode, bookmark, level + 1, document);
+
+        bookmark = FPDFBookmark_GetNextSibling(document, bookmark);
+    }
+}
+
+void QPdfBookmarkModelPrivate::rebuild()
+{
+    Q_Q(QPdfBookmarkModel);
+
+    const bool documentAvailable = (m_document && m_document->status() == QPdfDocument::Ready);
+
+    if (documentAvailable) {
+        q->beginResetModel();
+        m_rootNode->clear();
+        QPdfMutexLocker lock;
+        appendChildNode(m_rootNode.data(), nullptr, 0, m_document->d->doc);
+        lock.unlock();
+        q->endResetModel();
+    } else {
+        if (m_rootNode->childCount() == 0) {
+            return;
+        } else {
+            q->beginResetModel();
+            m_rootNode->clear();
+            q->endResetModel();
+        }
+    }
+}
+
 QT_END_NAMESPACE
 
-#include "moc_qpdfbookmarkmodel.cpp"
+//#include "moc_qpdfbookmarkmodel.cpp"
+
+
+
+
+
+
