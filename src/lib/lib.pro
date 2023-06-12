@@ -11,8 +11,8 @@ unix:!mac: CONFIG -= debug_and_release
 VPATH += $$QTPDF_ROOT/src/3rdparty/pdfium
 VPATH += $$QTPDF_ROOT/src/3rdparty/pdfium/third_party
 
-system(python $$QTPDF_ROOT/src/3rdparty/gyp2pri.py --gyp-var libjpeg_gyp_path=third_party/third_party.gyp --gyp-var pdf_use_skia=0 $$QTPDF_ROOT/src/3rdparty/pdfium/pdfium.gyp pdfium $$OUT_PWD/pdfium.pri)
-system(python $$QTPDF_ROOT/src/3rdparty/gyp2pri.py $$QTPDF_ROOT/src/3rdparty/pdfium/third_party/third_party.gyp fx_freetype $$OUT_PWD/freetype.pri)
+system(python2 $$QTPDF_ROOT/src/3rdparty/gyp2pri.py --gyp-var libjpeg_gyp_path=third_party/third_party.gyp --gyp-var pdf_use_skia=0 $$QTPDF_ROOT/src/3rdparty/pdfium/pdfium.gyp pdfium $$OUT_PWD/pdfium.pri)
+system(python2 $$QTPDF_ROOT/src/3rdparty/gyp2pri.py $$QTPDF_ROOT/src/3rdparty/pdfium/third_party/third_party.gyp fx_freetype $$OUT_PWD/freetype.pri)
 
 include($$OUT_PWD/pdfium.pri)
 
